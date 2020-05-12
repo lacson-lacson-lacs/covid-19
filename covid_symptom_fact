@@ -66,8 +66,8 @@ SELECT date,
   'fever/chills' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%chills%'
-  OR symptoms_list LIKE '%fever%'
+WHERE symptoms_list ILIKE '%chills%'
+  OR symptoms_list ILIKE '%fever%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -87,11 +87,11 @@ SELECT date,
   'cough' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%cough%'
-  OR symptoms_list LIKE '%phlegm%'
-  OR symptoms_list LIKE '%pharyn%'
-  OR symptoms_list LIKE '%sore throat%'
-  OR symptoms_list LIKE '%sputum%'
+WHERE symptoms_list ILIKE '%cough%'
+  OR symptoms_list ILIKE '%phlegm%'
+  OR symptoms_list ILIKE '%pharyn%'
+  OR symptoms_list ILIKE '%sore throat%'
+  OR symptoms_list ILIKE '%sputum%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -111,13 +111,13 @@ SELECT date,
   'pain' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%musc%'
-  OR symptoms_list LIKE '%myalgia%'
-  OR symptoms_list LIKE '%headache%'
-  OR symptoms_list LIKE '%soreness%'
-  OR symptoms_list LIKE '%ache%'
-  OR symptoms_list LIKE '%joint%'
-  OR symptoms_list LIKE '%bone%'
+WHERE symptoms_list ILIKE '%musc%'
+  OR symptoms_list ILIKE '%myalgia%'
+  OR symptoms_list ILIKE '%headache%'
+  OR symptoms_list ILIKE '%soreness%'
+  OR symptoms_list ILIKE '%ache%'
+  OR symptoms_list ILIKE '%joint%'
+  OR symptoms_list ILIKE '%bone%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -137,11 +137,11 @@ SELECT date,
   'fatigue' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%fatigue%'
-  OR symptoms_list LIKE '%letharg%'
-  OR symptoms_list LIKE '%malaise%'
-  OR symptoms_list LIKE '%weakness%'
-  OR symptoms_list LIKE '%dizz%'
+WHERE symptoms_list ILIKE '%fatigue%'
+  OR symptoms_list ILIKE '%letharg%'
+  OR symptoms_list ILIKE '%malaise%'
+  OR symptoms_list ILIKE '%weakness%'
+  OR symptoms_list ILIKE '%dizz%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -161,12 +161,12 @@ SELECT date,
   'respiratory distress' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE (symptoms_list LIKE '%respiratory%'
-  OR symptoms_list LIKE '%difficulty breathing%'
-  OR symptoms_list LIKE '%dyspnea%'
-  OR symptoms_list LIKE '%breath%')
-  AND symptoms_list NOT LIKE '%respiratory failure%'
-  AND symptoms_list NOT LIKE '%respiratory symptoms%'
+WHERE (symptoms_list ILIKE '%respiratory%'
+  OR symptoms_list ILIKE '%difficulty breathing%'
+  OR symptoms_list ILIKE '%dyspnea%'
+  OR symptoms_list ILIKE '%breath%')
+  AND symptoms_list NOT ILIKE '%respiratory failure%'
+  AND symptoms_list NOT ILIKE '%respiratory symptoms%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -186,11 +186,11 @@ SELECT date,
   'allergy-like' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%rhinorrhea%'
-  OR symptoms_list LIKE '%sneezing%'
-  OR symptoms_list LIKE '%conjunctivitis%'
-  OR symptoms_list LIKE '%eye%'
-  OR symptoms_list LIKE '%nose%'
+WHERE symptoms_list ILIKE '%rhinorrhea%'
+  OR symptoms_list ILIKE '%sneezing%'
+  OR symptoms_list ILIKE '%conjunctivitis%'
+  OR symptoms_list ILIKE '%eye%'
+  OR symptoms_list ILIKE '%nose%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -210,14 +210,14 @@ SELECT date,
   'gastrointestinal' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%diarrhea%'
-  OR symptoms_list LIKE '%vomiting%'
-  OR symptoms_list LIKE '%stomach%'
-  OR symptoms_list LIKE '%constipation%'
-  OR symptoms_list LIKE '%nausea%'
-  OR symptoms_list LIKE '%abdominal%'
-  OR symptoms_list LIKE '%emesis%'
-  OR symptoms_list LIKE '%digest%'
+WHERE symptoms_list ILIKE '%diarrhea%'
+  OR symptoms_list ILIKE '%vomiting%'
+  OR symptoms_list ILIKE '%stomach%'
+  OR symptoms_list ILIKE '%constipation%'
+  OR symptoms_list ILIKE '%nausea%'
+  OR symptoms_list ILIKE '%abdominal%'
+  OR symptoms_list ILIKE '%emesis%'
+  OR symptoms_list ILIKE '%digest%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -237,10 +237,10 @@ SELECT date,
   'cardiovascular' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%chest%'
-  OR symptoms_list LIKE '%cardio%'
-  OR symptoms_list LIKE '%heart%'
-  OR symptoms_list LIKE '%coronary%'
+WHERE symptoms_list ILIKE '%chest%'
+  OR symptoms_list ILIKE '%cardio%'
+  OR symptoms_list ILIKE '%heart%'
+  OR symptoms_list ILIKE '%coronary%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -260,9 +260,9 @@ SELECT date,
   'asymptomatic' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%asymptomatic%'
-  OR symptoms_list LIKE '%no%'
-  OR symptoms_list LIKE '%none%'
+WHERE symptoms_list ILIKE '%asymptomatic%'
+  OR symptoms_list ILIKE '%no%'
+  OR symptoms_list ILIKE '%none%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -282,7 +282,7 @@ SELECT date,
   'respiratory failure' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%respiratory failure%'
+WHERE symptoms_list ILIKE '%respiratory failure%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -302,10 +302,10 @@ SELECT date,
   'sepsis' AS symptom,
   SUM(infections) AS infections
 FROM clean
-WHERE symptoms_list LIKE '%kidney%'
-  OR symptoms_list LIKE '%renal%'
-  OR symptoms_list LIKE '%septic%'
-  OR symptoms_list LIKE '%sepsis%'
+WHERE symptoms_list ILIKE '%kidney%'
+  OR symptoms_list ILIKE '%renal%'
+  OR symptoms_list ILIKE '%septic%'
+  OR symptoms_list ILIKE '%sepsis%'
 GROUP BY 1,2,3,4,5,6,7,8,9,10
 HAVING SUM(infections) > 0
 ),
@@ -405,16 +405,16 @@ string_cat AS
 (
 SELECT *,
   CASE
-    WHEN age_string LIKE '%90-99%' THEN '90-99'
-    WHEN age_string LIKE '%80-89%' THEN '80-89'
-    WHEN age_string LIKE '%70-79%' THEN '70-79'
-    WHEN age_string LIKE '%60-69%' THEN '60-69'
-    WHEN age_string LIKE '%50-59%' THEN '50-59'
-    WHEN age_string LIKE '%40-49%' THEN '40-49'
-    WHEN age_string LIKE '%30-39%' THEN '30-39'
-    WHEN age_string LIKE '%20-29%' THEN '20-29'
-    WHEN age_string LIKE '%13-19%' THEN '13-19'
-    WHEN age_string LIKE '0-%' THEN '0-12'
+    WHEN age_string ILIKE '%90-99%' THEN '90-99'
+    WHEN age_string ILIKE '%80-89%' THEN '80-89'
+    WHEN age_string ILIKE '%70-79%' THEN '70-79'
+    WHEN age_string ILIKE '%60-69%' THEN '60-69'
+    WHEN age_string ILIKE '%50-59%' THEN '50-59'
+    WHEN age_string ILIKE '%40-49%' THEN '40-49'
+    WHEN age_string ILIKE '%30-39%' THEN '30-39'
+    WHEN age_string ILIKE '%20-29%' THEN '20-29'
+    WHEN age_string ILIKE '%13-19%' THEN '13-19'
+    WHEN age_string ILIKE '0-%' THEN '0-12'
     ELSE 'NOT_STRING'
   END AS age_string_cat,
   'NOT_INT' AS age_int_cat
@@ -426,16 +426,16 @@ int_cat AS
 SELECT *,
   'NOT_STRING' AS age_string_cat,
   CASE
-    WHEN age_int > 90 AND age_int < 99 THEN '90-99'
-    WHEN age_int > 80 AND age_int < 89 THEN '80-89'
-    WHEN age_int > 70 AND age_int < 79 THEN '70-79'
-    WHEN age_int > 60 AND age_int < 69 THEN '60-69'
-    WHEN age_int > 50 AND age_int < 59 THEN '50-59'
-    WHEN age_int > 40 AND age_int < 49 THEN '40-49'
-    WHEN age_int > 30 AND age_int < 39 THEN '30-39'
-    WHEN age_int > 20 AND age_int < 29 THEN '20-29'
-    WHEN age_int > 13 AND age_int < 19 THEN '13-19'
-    WHEN age_int > 0 AND age_int < 12 THEN '0-12'
+    WHEN age_int >= 90 AND age_int <= 99 THEN '90-99'
+    WHEN age_int >= 80 AND age_int <= 89 THEN '80-89'
+    WHEN age_int >= 70 AND age_int <= 79 THEN '70-79'
+    WHEN age_int >= 60 AND age_int <= 69 THEN '60-69'
+    WHEN age_int >= 50 AND age_int <= 59 THEN '50-59'
+    WHEN age_int >= 40 AND age_int <= 49 THEN '40-49'
+    WHEN age_int >= 30 AND age_int <= 39 THEN '30-39'
+    WHEN age_int >= 20 AND age_int <= 29 THEN '20-29'
+    WHEN age_int >= 13 AND age_int <= 19 THEN '13-19'
+    WHEN age_int >= 0 AND age_int <= 12 THEN '0-12'
     ELSE 'NOT_INT'
   END AS age_int_cat
 FROM finished_no_age_cat
