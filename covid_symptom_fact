@@ -1,0 +1,476 @@
+WITH no_agg_symps AS
+(
+SELECT date_confirmation AS date,
+  sex AS gender,
+  age,
+  latitude,
+  longitude,
+  city,
+  admin2 AS county,
+  admin1 AS state,
+  country,
+  id AS infection_id,
+  LOWER(symptoms) AS symptoms_list
+FROM public.bop_covid_stg
+WHERE date >= '2020-01-01'
+AND symptoms_list IS NOT NULL
+ORDER BY date asc
+),
+
+standard AS
+(
+SELECT *,
+  CASE
+    WHEN gender = 'male' THEN 'male'
+    WHEN gender = 'female' THEN 'female'
+    ELSE NULL
+  END AS gender_clean,
+  REGEXP_COUNT(age, '^[0-9]+$') AS integer_flag
+FROM no_agg_symps 
+),
+
+clean AS
+(
+SELECT date,
+  gender_clean AS gender,
+  age AS age_string, -- look for common increments and code in these too as strings
+  (CASE 
+    WHEN integer_flag = 1
+    THEN age
+    ELSE NULL
+  END)::integer AS age_int,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  symptoms_list,
+  COUNT(DISTINCT infection_id) AS infections  
+FROM standard
+GROUP BY 1,2,3,4,5,6,7,8,9,10,11
+),
+
+fever AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'fever/chills' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%chills%'
+  OR symptoms_list LIKE '%fever%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+cough AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'cough' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%cough%'
+  OR symptoms_list LIKE '%phlegm%'
+  OR symptoms_list LIKE '%pharyn%'
+  OR symptoms_list LIKE '%sore throat%'
+  OR symptoms_list LIKE '%sputum%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+pain AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'pain' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%musc%'
+  OR symptoms_list LIKE '%myalgia%'
+  OR symptoms_list LIKE '%headache%'
+  OR symptoms_list LIKE '%soreness%'
+  OR symptoms_list LIKE '%ache%'
+  OR symptoms_list LIKE '%joint%'
+  OR symptoms_list LIKE '%bone%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+fatigue AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'fatigue' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%fatigue%'
+  OR symptoms_list LIKE '%letharg%'
+  OR symptoms_list LIKE '%malaise%'
+  OR symptoms_list LIKE '%weakness%'
+  OR symptoms_list LIKE '%dizz%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+resp_distress AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'respiratory distress' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE (symptoms_list LIKE '%respiratory%'
+  OR symptoms_list LIKE '%difficulty breathing%'
+  OR symptoms_list LIKE '%dyspnea%'
+  OR symptoms_list LIKE '%breath%')
+  AND symptoms_list NOT LIKE '%respiratory failure%'
+  AND symptoms_list NOT LIKE '%respiratory symptoms%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+allergy AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'allergy-like' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%rhinorrhea%'
+  OR symptoms_list LIKE '%sneezing%'
+  OR symptoms_list LIKE '%conjunctivitis%'
+  OR symptoms_list LIKE '%eye%'
+  OR symptoms_list LIKE '%nose%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+gi AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'gastrointestinal' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%diarrhea%'
+  OR symptoms_list LIKE '%vomiting%'
+  OR symptoms_list LIKE '%stomach%'
+  OR symptoms_list LIKE '%constipation%'
+  OR symptoms_list LIKE '%nausea%'
+  OR symptoms_list LIKE '%abdominal%'
+  OR symptoms_list LIKE '%emesis%'
+  OR symptoms_list LIKE '%digest%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+cardio AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'cardiovascular' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%chest%'
+  OR symptoms_list LIKE '%cardio%'
+  OR symptoms_list LIKE '%heart%'
+  OR symptoms_list LIKE '%coronary%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+asymp AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'asymptomatic' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%asymptomatic%'
+  OR symptoms_list LIKE '%no%'
+  OR symptoms_list LIKE '%none%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+resp_fail AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'respiratory failure' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%respiratory failure%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+sepsis AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'sepsis' AS symptom,
+  SUM(infections) AS infections
+FROM clean
+WHERE symptoms_list LIKE '%kidney%'
+  OR symptoms_list LIKE '%renal%'
+  OR symptoms_list LIKE '%septic%'
+  OR symptoms_list LIKE '%sepsis%'
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+HAVING SUM(infections) > 0
+),
+
+union_wo_other AS
+(
+(SELECT * FROM fever) UNION ALL
+(SELECT * FROM cough) UNION ALL
+(SELECT * FROM pain) UNION ALL
+(SELECT * FROM fatigue) UNION ALL
+(SELECT * FROM resp_distress) UNION ALL
+(SELECT * FROM allergy) UNION ALL
+(SELECT * FROM gi) UNION ALL
+(SELECT * FROM cardio) UNION ALL
+(SELECT * FROM asymp) UNION ALL
+(SELECT * FROM sepsis) UNION ALL
+(SELECT * FROM resp_fail)
+),
+
+union_wo_other_agg AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  SUM(infections) AS infections_wo_other
+FROM union_wo_other
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+),
+
+all_infections AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  SUM(infections) AS all_infections
+FROM clean
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+),
+
+other_rough AS
+(
+SELECT a.*,
+  (a.all_infections-w.infections_wo_other) AS other_infections
+FROM all_infections a
+LEFT JOIN union_wo_other_agg w
+ON a.date = w.date
+AND a.gender = w.gender
+AND a.age_string = w.age_string
+AND a.age_int = w.age_int
+AND a.latitude = w.latitude
+AND a.longitude = w.longitude
+AND a.city = w.city
+AND a.county = w.county
+AND a.state = w.state
+AND a.country = w.country
+WHERE other_infections > 0
+),
+
+other AS
+(
+SELECT date,
+  gender,
+  age_string,
+  age_int::integer,
+  latitude,
+  longitude,
+  city,
+  county,
+  state,
+  country,
+  'other' AS symptom,
+  SUM(other_infections) AS infections
+FROM other_rough
+GROUP BY 1,2,3,4,5,6,7,8,9,10
+),
+
+finished_no_age_cat AS
+(
+(SELECT * FROM union_wo_other) UNION ALL (SELECT * FROM other)
+),
+
+string_cat AS
+(
+SELECT *,
+  CASE
+    WHEN age_string LIKE '%90-99%' THEN '90-99'
+    WHEN age_string LIKE '%80-89%' THEN '80-89'
+    WHEN age_string LIKE '%70-79%' THEN '70-79'
+    WHEN age_string LIKE '%60-69%' THEN '60-69'
+    WHEN age_string LIKE '%50-59%' THEN '50-59'
+    WHEN age_string LIKE '%40-49%' THEN '40-49'
+    WHEN age_string LIKE '%30-39%' THEN '30-39'
+    WHEN age_string LIKE '%20-29%' THEN '20-29'
+    WHEN age_string LIKE '%13-19%' THEN '13-19'
+    WHEN age_string LIKE '0-%' THEN '0-12'
+    ELSE 'NOT_STRING'
+  END AS age_string_cat,
+  'NOT_INT' AS age_int_cat
+FROM finished_no_age_cat
+),
+
+int_cat AS
+(
+SELECT *,
+  'NOT_STRING' AS age_string_cat,
+  CASE
+    WHEN age_int > 90 AND age_int < 99 THEN '90-99'
+    WHEN age_int > 80 AND age_int < 89 THEN '80-89'
+    WHEN age_int > 70 AND age_int < 79 THEN '70-79'
+    WHEN age_int > 60 AND age_int < 69 THEN '60-69'
+    WHEN age_int > 50 AND age_int < 59 THEN '50-59'
+    WHEN age_int > 40 AND age_int < 49 THEN '40-49'
+    WHEN age_int > 30 AND age_int < 39 THEN '30-39'
+    WHEN age_int > 20 AND age_int < 29 THEN '20-29'
+    WHEN age_int > 13 AND age_int < 19 THEN '13-19'
+    WHEN age_int > 0 AND age_int < 12 THEN '0-12'
+    ELSE 'NOT_INT'
+  END AS age_int_cat
+FROM finished_no_age_cat
+)
+
+SELECT COALESCE(s.date,i.date) AS date,
+  COALESCE(s.gender,i.gender) AS gender,
+  COALESCE(s.age_int,i.age_int) AS age,
+  CASE
+    WHEN s.age_string_cat = 'NOT_STRING'
+      AND i.age_int_cat = 'NOT_INT'
+    THEN 'uncategorized'
+    WHEN s.age_string_cat <> 'NOT_STRING'
+    THEN s.age_string_cat
+    WHEN i.age_int_cat <> 'NOT_INT'
+    THEN i.age_int_cat
+    ELSE 'uncategorized'
+  END AS age_category,
+  COALESCE(s.latitude,i.latitude) AS latitude,
+  COALESCE(s.longitude, i.longitude) AS longitude,
+  COALESCE(s.city,i.city) AS city,
+  COALESCE(s.county,i.county) AS county,
+  COALESCE(s.state,i.state) AS state,
+  COALESCE(s.country,i.country) AS country,
+  COALESCE(s.symptom,i.symptom) AS symptom,
+  COALESCE(s.infections,i.infections) AS infections
+FROM string_cat s
+FULL OUTER JOIN int_cat i
+ON s.date=i.date AND
+  s.gender=i.gender AND
+  s.age_string=i.age_string AND
+  s.latitude=i.latitude AND
+  s.longitude=i.longitude AND
+  s.city=i.city AND
+  s.county=i.county AND
+  s.state=i.state AND
+  s.country=i.country AND
+  s.symptom=i.symptom
